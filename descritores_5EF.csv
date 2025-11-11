@@ -1,0 +1,44 @@
+NU_DESCRITOR_HABILIDADE;TP_DISCIPLINA;DESCRICAO
+D1;LP;Localizar informações explícitas em um texto.
+D3;LP;Inferir o sentido de uma palavra ou expressão.
+D4;LP;Inferir uma informação implícita em um texto.
+D6;LP;Identificar o tema de um texto.
+D11;LP;Distinguir um fato da opinião relativa a esse fato.
+D5;LP;Interpretar texto com auxílio de material gráfico diverso (propagandas, quadrinhos, foto etc.).
+D9;LP;Identificar a finalidade de textos de diferentes gêneros.
+D15;LP;Reconhecer diferentes formas de tratar uma informação na comparação de textos que tratam do mesmo tema, emfunção das condições em que ele foi produzido e daquelas em que será recebido.
+D2;LP;Estabelecer relações entre partes de um texto, identificando repetições ou substituições que contribuem para a continuidade de um texto.
+D7;LP;Identificar o conflito gerador do enredo e os elementos que constroem a narrativa.
+D8;LP;Estabelecer relação causa/consequência entre partes e elementos do texto.
+D12;LP;Estabelecer relações lógico-discursivas presentes no texto, marcadas por conjunções, advérbios etc.
+D13;LP;Identificar efeitos de ironia ou humor em textos variados.
+D14;LP;Identificar o efeito de sentido decorrente do uso da pontuação e de outras notações.
+D10;LP;Identificar as marcas linguísticas que evidenciam o locutor e o interlocutor de um texto.
+D1;MT;Identificar a localização/movimentação de objeto em mapas, croquis e outras representações gráficas.
+D2;MT;Identificar propriedades comuns e diferenças entre poliedros e corpos redondos, relacionando figuras tridimensionais com suas planificações.
+D3;MT;Identificar propriedades comuns e diferenças entre figuras bidimensionais pelo número de lados, pelos tipos de ângulos.
+D4;MT;Identificar quadriláteros observando as posições relativas entre seus lados (paralelos, concorrentes, perpendiculares).
+D5;MT;Reconhecer a conservação ou modificação de medidas dos lados, do perímetro, da área em ampliação e/ou redução de figuras poligonais usando malhas quadriculadas.
+D6;MT;Estimar a medida de grandezas utilizando unidades de medida convencionais ou não.
+D7;MT;Resolver problemas significativos utilizando unidades de medida padronizadas como km/m/ cm/mm, kg/g/mg, l/ml.
+D8;MT;Estabelecer relações entre unidades de medida de tempo.
+D9;MT;Estabelecer relações entre o horário de início e término e/ou o intervalo da duração de um evento ou acontecimento.
+D10;MT;Num problema, estabelecer trocas entre cédulas e moedas do sistema monetário brasileiro, em função de seus valores.
+D11;MT;Resolver problema envolvendo o cálculo do perímetro de figuras planas, desenhadas em malhas quadriculadas.
+D12;MT;Resolver problema envolvendo o cálculo ou estimativa de áreas de figuras planas, desenhadas em malhas quadriculadas.
+D13;MT;Reconhecer e utilizar características do sistema de numeração decimal, tais como agrupamentos e trocas na base 10 e princípio do valor posicional.
+D14;MT;Identificar a localização de números naturais na reta numérica.
+D15;MT;Reconhecer a decomposição de números naturais nas suas diversas ordens.
+D16;MT;Reconhecer a composição e a decomposição de números naturais em sua forma polinomial.
+D17;MT;Calcular o resultado de uma adição ou subtração de números naturais.
+D18;MT;Calcular o resultado de uma multiplicação ou divisão de números naturais.
+D19;MT;Resolver problema com números naturais, envolvendo diferentes significados da adição ou subtração: juntar, alteração de um estado inicial (positiva ou negativa), comparação e mais de uma transformação (positiva ou negativa).
+D20;MT;Resolver problema com números naturais, envolvendo diferentes significados da multiplicação ou divisão: multiplicação comparativa, idéia de proporcionalidade, configuração retangular e combinatória.
+D21;MT;Identificar diferentes representações de um mesmo número racional.
+D22;MT;Identificar a localização de números racionais representados na forma decimal na reta numérica.
+D23;MT;Resolver problema utilizando a escrita decimal de cédulas e moedas do sistema monetário brasileiro.
+D24;MT;Identificar fração como representação que pode estar associada a diferentes significados.
+D25;MT;Resolver problema com números racionais expressos na forma decimal envolvendo diferentes significados da adição ou subtração.
+D26;MT;Resolver problema envolvendo noções de porcentagem (25%, 50%, 100%).
+D27;MT;Ler informações e dados apresentados em tabelas.
+D28;MT;Ler informações e dados apresentados em gráficos (particularmente em gráficos de colunas).
