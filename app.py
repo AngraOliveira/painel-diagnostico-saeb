@@ -39,16 +39,20 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# --- Constantes de Arquivo e UF (Mantidas) ---
+# --- Constantes de Arquivo e UF (Alteradas para .csv.gz) ---
 ARQUIVOS_SERIES = {
     '5EF': {
-        'resultados': 'resultados_finais_5EF.csv',
-        'diagnostico': 'diagnostico_habilidades_5EF.csv',
+        # ⭐️ ALTERADO: Caminho e extensão para GZIP
+        'resultados': 'data/resultados_finais_5EF.csv.gz',
+        # ⭐️ ALTERADO: Caminho e extensão para GZIP
+        'diagnostico': 'data/diagnostico_habilidades_5EF.csv.gz',
         'matriz': 'descritores_5EF.csv'  
     },
     '9EF': {
-        'resultados': 'resultados_finais_9EF.csv',
-        'diagnostico': 'diagnostico_habilidades_9EF.csv',
+        # ⭐️ ALTERADO: Caminho e extensão para GZIP
+        'resultados': 'data/resultados_finais_9EF.csv.gz',
+        # ⭐️ ALTERADO: Caminho e extensão para GZIP
+        'diagnostico': 'data/diagnostico_habilidades_9EF.csv.gz',
         'matriz': 'descritores_9EF.csv' 
     }
 }
@@ -75,7 +79,7 @@ MAPA_UF = {
 }
 
 # ----------------------------------------------------------------------------------
-# --- DICIONÁRIO DE CONFIGURAÇÃO POR SÉRIE (AJUSTADO PELA ANÁLISE DO K-MEANS) ---
+# --- DICIONÁRIO DE CONFIGURAÇÃO POR SÉRIE (Mantido) ---
 # ----------------------------------------------------------------------------------
 CONFIG_APP_SERIES = {
     '5EF': {
@@ -86,14 +90,14 @@ CONFIG_APP_SERIES = {
             '2': 'Risco Extremo em MT (Discalculia)',
             '0': 'Abaixo da Média Equilibrado',      
             '6': 'Risco Extremo LP (Dislexia Forte)',
-            '5': 'Risco MT (Discalculia Moderado)',  
+            '5': 'Risco MT (Discalculia Moderado)',   
             '4': 'Alto Desempenho Equilibrado',      
         },
         # 2. RISCO_PARA_CLUSTER: Agrupa os clusters em categorias de intervenção
         'RISCO_PARA_CLUSTER': {
-            'Alto Risco': ['3', '1', '2', '6'],        
-            'Risco Moderado': ['0', '5'],              
-            'Normal': ['4']                            
+            'Alto Risco': ['3', '1', '2', '6'],         
+            'Risco Moderado': ['0', '5'],               
+            'Normal': ['4']                          
         },
         # 3. Mapeamento Reverso: Define o status de risco do CLUSTER
         'CLUSTER_PARA_RISCO': {
@@ -116,8 +120,8 @@ CONFIG_APP_SERIES = {
         # 2. RISCO_PARA_CLUSTER: Agrupa os clusters em categorias de intervenção
         'RISCO_PARA_CLUSTER': {
             'Alto Risco': ['0', '6', '3', '2'], 
-            'Risco Moderado': ['5', '1'],       
-            'Normal': ['4']                     
+            'Risco Moderado': ['5', '1'],        
+            'Normal': ['4']                      
         },
         # 3. Mapeamento Reverso: Define o status de risco do CLUSTER
         'CLUSTER_PARA_RISCO': {
@@ -129,7 +133,7 @@ CONFIG_APP_SERIES = {
 }
 # ----------------------------------------------------------------------------------
 
-# 4. Status de Risco Final (Ordem de exibição - Global, não muda)
+# 4. Status de Risco Final (Mantido)
 STATUS_RISCO_FINAL = [
     'Normal',
     'Risco Moderado',
@@ -137,7 +141,7 @@ STATUS_RISCO_FINAL = [
     'Superdotação' 
 ]
 
-# NOVO: Chave de ordenação para as legendas (Prioridade do mais crítico para o mais leve)
+# NOVO: Chave de ordenação para as legendas (Mantido)
 RISK_SORT_KEY = {
     'Alto Risco': 0,
     'Risco Moderado': 1,
@@ -154,14 +158,15 @@ COR_MODERADO = '#9467bd'
 COR_NORMAL = COR_SECUNDARIA_VERDE 
 COR_SUPERDOTACAO = '#ff7f0e' 
 
-# --- Funções Auxiliares (Ajustadas para usar a configuração da Série) ---
+# --- Funções Auxiliares (Mantidas) ---
+# ... (Funções auxiliares set_clusters_from_risco, set_risco_from_clusters, limpar_caracteres_acentuados)
 
 def set_clusters_from_risco(config_serie):
     """Atualiza a seleção de clusters baseada na seleção de status de risco."""
     riscos_selecionados = st.session_state.filtro_status_risco_global_temp
     clusters_a_selecionar = set()
     risco_para_cluster = config_serie['RISCO_PARA_CLUSTER']
-  
+ 
     for risco in riscos_selecionados:
         clusters_a_selecionar.update(risco_para_cluster.get(risco, []))
     st.session_state.filtro_cluster_global_temp = list(clusters_a_selecionar)
@@ -185,7 +190,7 @@ def set_risco_from_clusters(todos_status, config_serie):
 def limpar_caracteres_acentuados(texto):
     if pd.isna(texto) or not isinstance(texto, str):
         return texto
-   
+    
     texto = texto.replace('Ã£o', 'ão').replace('Ã£o', 'ão')
     texto = texto.replace('Ãªncia', 'ência')
     texto = texto.replace('Ã¡', 'á').replace('Ã©', 'é').replace('Ã­', 'í').replace('Ã³', 'ó').replace('Ãº', 'ú')
@@ -196,6 +201,7 @@ def limpar_caracteres_acentuados(texto):
 
 @st.cache_data
 def carregar_dados(serie):
+    """Função para carregar todos os dataframes necessários."""
     
     COLUNA_DESCRITOR_MATRIZ = 'NU_DESCRITOR_HABILIDADE' 
     COLUNA_DESCRICAO_MATRIZ = 'DESCRICAO'
@@ -206,40 +212,42 @@ def carregar_dados(serie):
     caminho_matriz = ARQUIVOS_SERIES[serie]['matriz']
 
     if not os.path.exists(caminho_resultados) or not os.path.exists(caminho_diagnostico):
-        st.error(f"ERRO: Arquivos principais da série {serie} não encontrados.")
+        st.error(f"ERRO: Arquivos principais da série {serie} não encontrados. Verifique se eles estão em 'data/'")
         return None, None
 
     try:
+        # ⭐️ NOVO: Adicionado compression='gzip' para ler resultados compactados
         df_alunos = pd.read_csv(
             caminho_resultados,
             sep=SEPARADOR_CSV,
             encoding='latin-1',
+            compression='gzip', # ⭐️ ADICIONADO: Suporte a GZIP
             dtype={'ID_ALUNO': str, 'CLUSTER': str}
         )
     except Exception as e:
         st.error(f"Erro ao ler {caminho_resultados}. Detalhe: {e}")
         return None, None
         
-    # --- CORREÇÃO DE ERRO: GARANTIR QUE STATUS_RISCO_FINAL É SEMPRE STRING ---
-    # Isso resolve o TypeError: '<' not supported between instances of 'float' and 'str'
+    # --- CORREÇÃO DE ERRO: GARANTIR QUE STATUS_RISCO_FINAL É SEMPRE STRING (Mantido) ---
     df_alunos['STATUS_RISCO_FINAL'] = df_alunos['STATUS_RISCO_FINAL'].astype(str).replace('nan', 'Normal') 
-    # O .replace('nan', 'Normal') trata valores nulos que foram convertidos para a string literal 'nan'
     
     df_alunos['ID_UF'] = pd.to_numeric(df_alunos['ID_UF'], errors='coerce').fillna(-1).astype(int)
     df_alunos['UF_DESCRICAO'] = df_alunos['ID_UF'].map(MAPA_UF).fillna('UF Desconhecida')
 
     try:
+        # ⭐️ NOVO: Adicionado compression='gzip' para ler diagnóstico compactado
         df_diagnostico = pd.read_csv(
             caminho_diagnostico,
             sep=SEPARADOR_CSV,
             encoding='latin-1',
+            compression='gzip', # ⭐️ ADICIONADO: Suporte a GZIP
             dtype={'CLUSTER': str, COLUNA_DESCRITOR_MATRIZ: str}
         )
+        # Matriz não é compactada, mas é bom especificar a compressão como 'infer' se a extensão for .gz
         df_matriz = pd.read_csv(
             caminho_matriz,
             sep=SEPARADOR_CSV,
             encoding='latin-1'
-       
         )
     except Exception as e:
         st.error(f"Erro ao carregar arquivos de diagnóstico/matriz. Detalhe: {e}")
@@ -264,7 +272,7 @@ def carregar_dados(serie):
             columns={COLUNA_DESCRICAO_MATRIZ: 'DESCRICAO_HABILIDADE'}, 
             inplace=True
         )
-   
+    
     df_diag_completo['DESCRICAO_HABILIDADE'] = df_diag_completo['DESCRICAO_HABILIDADE'].apply(limpar_caracteres_acentuados)
 
     df_diag_completo['DESCRICAO_HABILIDADE'] = df_diag_completo['DESCRICAO_HABILIDADE'].fillna(
@@ -274,15 +282,16 @@ def carregar_dados(serie):
     return df_alunos, df_diag_completo
 
 
-# --- Interface Principal (Início) ---
+# --- Interface Principal (Início) (Mantida) ---
 
 st.title("📊 Painel de Diagnóstico de Habilidades (SAEB)")
 st.markdown("Use este painel para analisar o perfil dos alunos e suas dificuldades por habilidade.")
 
-# --- Barra Lateral (Sidebar) ---
-st.sidebar.title("Filtros Globais")
+# --- Barra Lateral (Sidebar) (Mantida) ---
+# ... (Resto do código da interface Streamlit inalterado)
 
 # 1. Filtro Série
+st.sidebar.title("Filtros Globais")
 serie_selecionada = st.sidebar.selectbox(
     "Selecione a Série",
     ['5EF', '9EF'],
@@ -303,12 +312,10 @@ else:
     CLUSTER_PARA_RISCO = config_app['CLUSTER_PARA_RISCO']
     
     # Variáveis de estado iniciais
-    # A linha abaixo agora funciona corretamente, pois a coluna foi forçada a ser string
     todos_status = sorted(df_alunos['STATUS_RISCO_FINAL'].unique()) 
     todos_clusters = sorted(df_alunos['CLUSTER'].unique())
 
     if 'filtro_status_risco_global_temp' not in st.session_state:
-        # AQUI usamos a lista do STATUS_RISCO_FINAL para garantir a ordem/total
         st.session_state.filtro_status_risco_global_temp = [s for s in STATUS_RISCO_FINAL if s in todos_status]
     if 'filtro_cluster_global_temp' not in st.session_state:
         st.session_state.filtro_cluster_global_temp = todos_clusters

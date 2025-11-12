@@ -1,7 +1,8 @@
 import pandas as pd
 import os 
 import numpy as np
-import re # Importação necessária para expressões regulares
+import re 
+from tqdm import tqdm # Adicionado tqdm para visualização do chunking (opcional, mas recomendado)
 
 # --- CONFIGURAÇÃO DE CAMINHOS ---
 DIRETORIO_DADOS = 'D:/PI_SAEB/DADOS'
@@ -10,15 +11,15 @@ CAMINHO_ITENS = os.path.join(DIRETORIO_DADOS, 'TS_ITEM.csv')
 
 # Mapeamento de arquivos por série
 ARQUIVOS_SERIES = {
-    '5EF': {
-        'respostas': os.path.join(DIRETORIO_DADOS, 'TS_ALUNO_5EF.csv'),
-        'cluster': 'resultados_finais_5EF.csv', 
-        'saida': 'diagnostico_habilidades_5EF.csv',
-    },
+ '5EF': {
+    'respostas': os.path.join(DIRETORIO_DADOS, 'TS_ALUNO_5EF.csv'),
+    'cluster': 'data/resultados_finais_5EF.csv.gz', 
+    'saida': 'data/diagnostico_habilidades_5EF.csv.gz',
+},
     '9EF': {
-        'respostas': os.path.join(DIRETORIO_DADOS, 'TS_ALUNO_9EF.csv'),
-        'cluster': 'resultados_finais_9EF.csv', 
-        'saida': 'diagnostico_habilidades_9EF.csv',
+    'respostas': os.path.join(DIRETORIO_DADOS, 'TS_ALUNO_9EF.csv'),
+    'cluster': 'data/resultados_finais_9EF.csv.gz', 
+    'saida': 'data/diagnostico_habilidades_9EF.csv.gz',
     }
 }
 
@@ -94,8 +95,7 @@ def processar_chunk(df_chunk, map_itens):
 
     resultados = df_chunk.apply(gerar_acertos_aluno, axis=1)
     
-    # ACHATAMENTO DENTRO DO CHUNK: O gargalo de memória foi aqui!
-    # A lista é achatada e convertida em DF DENTRO de cada chunk, liberando memória.
+    # ACHATAMENTO DENTRO DO CHUNK
     lista_acertos = [item for sublist in resultados.tolist() for item in sublist]
     df_acertos_chunk = pd.DataFrame(lista_acertos)
     
@@ -117,14 +117,13 @@ def gerar_diagnostico_habilidades_chunked(serie_config):
     COLUNA_BLOCO = 'NU_BLOCO'
 
     try:
-        # 1. Carregar Metadados (TS_ITEM) e Clusters (fora do loop)
+        # 1. Carregar Metadados (TS_ITEM)
         df_itens = pd.read_csv(CAMINHO_ITENS, sep=';', encoding='latin-1') 
         df_itens = df_itens[[COLUNA_ID_ITEM, COLUNA_DESCRITOR, COLUNA_DISCIPLINA, 
                              COLUNA_GABARITO, COLUNA_POSICAO, COLUNA_BLOCO]].copy()
         df_itens.dropna(subset=[COLUNA_GABARITO], inplace=True)
         
-        # 🛑 CORREÇÃO CRÍTICA: FILTRAR APENAS CÓDIGOS OFICIAIS SAEB (D<número>)
-        # Isso garante que apenas os descritores que você tem a descrição oficial sejam processados.
+        # 🛑 FILTRAR APENAS CÓDIGOS OFICIAIS SAEB (D<número>)
         df_itens = df_itens[
             df_itens[COLUNA_DESCRITOR].astype(str).str.match(r'^D\d+$')
         ].copy()
@@ -133,7 +132,13 @@ def gerar_diagnostico_habilidades_chunked(serie_config):
             print("AVISO: Após a filtragem, o arquivo TS_ITEM.csv não contém descritores no formato SAEB (D<número>). Verifique a matriz de referência usada.")
             return None
         
-        df_clusters = pd.read_csv(ARQUIVOS_SERIES[serie_config]['cluster'], sep=';', encoding='latin-1')
+        # ⭐️ NOVO: LER O ARQUIVO DE CLUSTER COMPACTADO
+        df_clusters = pd.read_csv(
+            ARQUIVOS_SERIES[serie_config]['cluster'], 
+            sep=';', 
+            encoding='latin-1',
+            compression='gzip' # ⭐️ ADICIONADO: Compressão para leitura do .csv.gz
+        )
         df_clusters = df_clusters[[COLUNA_ID_ALUNO, COLUNA_CLUSTER]].copy()
         df_clusters[COLUNA_ID_ALUNO] = df_clusters[COLUNA_ID_ALUNO].astype(str)
         
@@ -148,10 +153,11 @@ def gerar_diagnostico_habilidades_chunked(serie_config):
     
     # 2. Carregar Respostas em Blocos (Chunking)
     chunk_reader = pd.read_csv(ARQUIVOS_SERIES[serie_config]['respostas'], 
-                               sep=';', encoding='latin-1', 
-                               low_memory=False, iterator=True, chunksize=CHUNK_SIZE)
+                             sep=';', encoding='latin-1', 
+                             low_memory=False, iterator=True, chunksize=CHUNK_SIZE)
     
     chunk_num = 0
+    # ... (restante do loop de chunking mantido)
     for df_chunk_resp in chunk_reader:
         chunk_num += 1
         print(f"Processando Bloco {chunk_num}...")
@@ -185,8 +191,17 @@ def gerar_diagnostico_habilidades_chunked(serie_config):
     df_diagnostico_final['TAXA_ERRO'] = 1 - df_diagnostico_final['ACERTO']
     df_diagnostico_final.drop(columns=['ACERTO'], inplace=True)
     
-    # 4. Salvar Resultado
-    df_diagnostico_final.to_csv(ARQUIVOS_SERIES[serie_config]['saida'], sep=';', encoding='latin-1', index=False)
+    # ⭐️ NOVO: GARANTIR QUE O DIRETÓRIO 'data' EXISTA
+    os.makedirs(os.path.dirname(ARQUIVOS_SERIES[serie_config]['saida']), exist_ok=True)
+    
+    # ⭐️ NOVO: SALVAR O RESULTADO COMPACTADO
+    df_diagnostico_final.to_csv(
+        ARQUIVOS_SERIES[serie_config]['saida'], 
+        sep=';', 
+        encoding='utf-8', 
+        compression='gzip', # ⭐️ ADICIONADO: Compactação para salvar
+        index=False
+    )
     print(f"Diagnóstico de habilidades para {serie_config} concluído e salvo em '{ARQUIVOS_SERIES[serie_config]['saida']}'.")
     
     return df_diagnostico_final

@@ -17,3 +17,5 @@ resultados_finais_5EF.csv
 resultados_finais_9EF.csv
 diagnostico_habilidades_5EF.csv
 diagnostico_habilidades_9EF.csv
+
+git add -f data/*.gz
