@@ -215,6 +215,9 @@ def carregar_dados(serie: str) -> Tuple[pd.DataFrame | None, pd.DataFrame | None
     except KeyError as e:
         st.error(f"KeyError durante o Merge: A coluna **{e}** não foi encontrada no seu arquivo de descritores.")
         return None, None
+    
+    COLUNA_DISCIPLINA_MATRIZ = 'TP_DISCIPLINA' # Definida no topo da função
+    df_diag_completo[COLUNA_DISCIPLINA_MATRIZ] = df_diag_completo[COLUNA_DISCIPLINA_MATRIZ].astype(str).str.strip()
 
     # Garante o nome padrão para a coluna de descrição da habilidade
     if COLUNA_DESCRICAO_MATRIZ != 'DESCRICAO_HABILIDADE' and COLUNA_DESCRICAO_MATRIZ in df_diag_completo.columns:
