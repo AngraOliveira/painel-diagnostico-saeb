@@ -3,7 +3,7 @@ from sklearn.cluster import KMeans
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 import numpy as np
-import os # ⭐️ Adicionada a importação de 'os' para manipulação de diretórios
+import os 
 
 # Constantes globais
 SEED = 42
@@ -19,7 +19,6 @@ COLUNAS_MANTER = [
     'TX_RESP_Q05c'    # Q05c: Superdotação
 ]
 
-# --- DICIONÁRIO DE CONFIGURAÇÃO POR SÉRIE (MUDE OS VALORES DO 9EF!) ---
 CONFIG_SERIES = {
     '5EF': {
         'N_CLUSTERS': 7, 
@@ -34,8 +33,6 @@ CONFIG_SERIES = {
         'NORMAL_BASE': ['4', '0']
     }
 }
-# -----------------------------------------------------------------------
-
 
 def classificar_risco_final(cluster_id_str, flag_risco_anomalia, tx_resp_q05c, config_risco):
     """
@@ -47,27 +44,22 @@ def classificar_risco_final(cluster_id_str, flag_risco_anomalia, tx_resp_q05c, c
     CLUSTERS_MODERADO = config_risco['MODERADO']
     CLUSTERS_NORMAL_BASE = config_risco['NORMAL_BASE']
 
-    # 1. Prioridade Máxima: SUPERDOTAÇÃO
     if tx_resp_q05c == 'B' and cluster_id_str in CLUSTERS_NORMAL_BASE:
         return 'Superdotação'
 
-    # 2. CLUSTERS DE ALTO RISCO
     if cluster_id_str in CLUSTERS_ALTO_RISCO:
         return 'Alto Risco'
 
-    # 3. CLUSTERS DE RISCO MODERADO
     elif cluster_id_str in CLUSTERS_MODERADO:
         if flag_risco_anomalia == 'Risco':
-            return 'Alto Risco' # Outlier em Moderado -> Alto
+            return 'Alto Risco' 
         else:
              return 'Risco Moderado'
-    
-    # 4. CLUSTER NORMAL
+
     elif cluster_id_str in CLUSTERS_NORMAL_BASE:
         if flag_risco_anomalia == 'Risco':
-             return 'Risco Moderado' # Outlier em Normal -> Moderado
-    
-    # Caso de segurança
+             return 'Risco Moderado' 
+   
     else:
         return 'Normal'
 
@@ -77,20 +69,16 @@ def carregar_e_processar_dados(caminho_csv, ano_escolar, config_serie):
     print(f"Iniciando processamento para {ano_escolar} com K={config_serie['N_CLUSTERS']}...")
     
     try:
-        # Tenta ler apenas as colunas necessárias para otimizar a memória
         df = pd.read_csv(caminho_csv, sep=';', encoding='latin-1', usecols=lambda x: x in COLUNAS_MANTER)
     except Exception as e:
         print(f"Erro ao carregar {caminho_csv}: {e}")
         return None
 
-    # Limpeza, Seleção e Engenharia de Features
     df.dropna(subset=FEATURES_PRINCIPAIS, inplace=True)
     df.drop_duplicates(subset=['ID_ALUNO'], keep='first', inplace=True)
     
-    # Preenchimento de 'TX_RESP_Q05c' (Não-Superdotação)
     df['TX_RESP_Q05c'] = df['TX_RESP_Q05c'].fillna('B')
-    
-    # Engenharia de Features
+   
     df['DISCREPANCIA'] = df['PROFICIENCIA_LP'] - df['PROFICIENCIA_MT']
     
     # Normalização para o Clustering e Isolation Forest
@@ -126,26 +114,20 @@ def carregar_e_processar_dados(caminho_csv, ano_escolar, config_serie):
 
 # --- Execução Principal ---
 if __name__ == "__main__":
-    os.makedirs('data', exist_ok=True) # ⭐️ Garante que a pasta 'data' existe
+    os.makedirs('data', exist_ok=True) 
 
     CAMINHO_5EF = 'D:/PI_SAEB/DADOS/TS_ALUNO_5EF.csv'
     CAMINHO_9EF = 'D:/PI_SAEB/DADOS/TS_ALUNO_9EF.csv'
     
-    # Processa 5EF
     df_5ef_analisado = carregar_e_processar_dados(CAMINHO_5EF, '5º Ano', CONFIG_SERIES['5EF'])
-    
-    # Processa 9EF
     df_9ef_analisado = carregar_e_processar_dados(CAMINHO_9EF, '9º Ano', CONFIG_SERIES['9EF'])
     
-    # ----------------------------------------------------------------------
-    # ⭐️ ALTERAÇÃO PARA COMPACTAÇÃO (GZIP) E MUDANÇA DE NOME DO ARQUIVO
-    # ----------------------------------------------------------------------
     if df_5ef_analisado is not None:
         df_5ef_analisado.to_csv(
             'data/resultados_finais_5EF.csv.gz', 
             sep=';', 
             encoding='utf-8', 
-            compression='gzip', # ⭐️ ADICIONADO: COMPACTAÇÃO
+            compression='gzip', 
             index=False
         )
         print("Arquivo 'data/resultados_finais_5EF.csv.gz' salvo com sucesso.")
@@ -155,7 +137,7 @@ if __name__ == "__main__":
             'data/resultados_finais_9EF.csv.gz', 
             sep=';', 
             encoding='utf-8', 
-            compression='gzip', # ⭐️ ADICIONADO: COMPACTAÇÃO
+            compression='gzip',
             index=False
         )
         print("Arquivo 'data/resultados_finais_9EF.csv.gz' salvo com sucesso.")

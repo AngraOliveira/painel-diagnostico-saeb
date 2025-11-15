@@ -7,14 +7,14 @@ import numpy as np
 import re 
 from typing import Dict, Any, Tuple
 
-# --- Configuração da Página ---
+#  Configuração da Página 
 st.set_page_config(
-    page_title="Painel de Diagnóstico SAEB",
+    page_title="Painel de Diagnóstico SAEB - 2023",
     page_icon="📊",
     layout="wide"
 )
 
-# --- Constantes Globais (Mantidas) ---
+#  Constantes Globais  
 ARQUIVOS_SERIES = {
     '5EF': {
         'resultados': 'data/resultados_finais_5EF.csv.gz',
@@ -48,7 +48,7 @@ MAPA_UF = {
     52: 'GO - Goiás', 53: 'DF - Distrito Federal', 
     -1: 'Não Informado' 
 }
-CONFIG_APP_SERIES = { # Dicionário de configuração por série
+CONFIG_APP_SERIES = { 
     '5EF': {
         'CLUSTER_LEGEND': {
             '3': 'Dificuldade Crítica Generalizada', '1': 'Risco Extremo em LP (Dislexia)',   
@@ -90,7 +90,7 @@ COR_MODERADO = '#9467bd'
 COR_NORMAL = COR_SECUNDARIA_VERDE 
 COR_SUPERDOTACAO = '#ff7f0e' 
 
-# --- CSS Customizado (Mantido) ---
+
 st.markdown("""
 <style>
     /* ... CSS Mantido ... */
@@ -109,7 +109,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# --- Funções Auxiliares (Mantidas) ---
+#  Funções Auxiliares  
 
 def set_clusters_from_risco(config_serie: Dict[str, Any]):
     """Atualiza a seleção de clusters baseada na seleção de status de risco."""
@@ -140,14 +140,12 @@ def limpar_caracteres_acentuados(texto: Any) -> Any:
     """Função para tentar corrigir problemas de codificação de caracteres."""
     if pd.isna(texto) or not isinstance(texto, str):
         return texto
-    
-    # As correções do seu código original
+        
     texto = texto.replace('Ã£o', 'ão').replace('Ã£o', 'ão')
     texto = texto.replace('Ãªncia', 'ência')
     texto = texto.replace('Ã¡', 'á').replace('Ã©', 'é').replace('Ã­', 'í').replace('Ã³', 'ó').replace('Ãº', 'ú')
     texto = texto.replace('Ã§', 'ç').replace('Ãµ', 'õ')
     texto = texto.replace('Ão', 'ão').replace('Ãa', 'ã') 
-    # Tentativa de correção genérica para padrões comuns de latin-1 corrompido em utf-8
     texto = re.sub(r'Ã\w+', lambda m: m.group(0).lstrip('Ã'), texto) 
     return texto
 
@@ -216,10 +214,9 @@ def carregar_dados(serie: str) -> Tuple[pd.DataFrame | None, pd.DataFrame | None
         st.error(f"KeyError durante o Merge: A coluna **{e}** não foi encontrada no seu arquivo de descritores.")
         return None, None
     
-    COLUNA_DISCIPLINA_MATRIZ = 'TP_DISCIPLINA' # Definida no topo da função
+    COLUNA_DISCIPLINA_MATRIZ = 'TP_DISCIPLINA' 
     df_diag_completo[COLUNA_DISCIPLINA_MATRIZ] = df_diag_completo[COLUNA_DISCIPLINA_MATRIZ].astype(str).str.strip()
-
-    # Garante o nome padrão para a coluna de descrição da habilidade
+    
     if COLUNA_DESCRICAO_MATRIZ != 'DESCRICAO_HABILIDADE' and COLUNA_DESCRICAO_MATRIZ in df_diag_completo.columns:
         df_diag_completo.rename(
             columns={COLUNA_DESCRICAO_MATRIZ: 'DESCRICAO_HABILIDADE'}, 
@@ -234,7 +231,7 @@ def carregar_dados(serie: str) -> Tuple[pd.DataFrame | None, pd.DataFrame | None
 
     return df_alunos, df_diag_completo
 
-# --- Funções de Visualização (NOVO) ---
+#  Funções de Visualização
 
 def criar_kpis_visao_geral(df_alunos_filtrado: pd.DataFrame):
     """Exibe os KPIs principais na Visão Geral."""
@@ -322,7 +319,6 @@ def criar_grafico_dispersao(df_alunos_filtrado: pd.DataFrame, cluster_legend: Di
     
     df_alunos_filtrado['DESCRICAO_CLUSTER'] = df_alunos_filtrado['CLUSTER'].map(cluster_legend).fillna('Desconhecido')
     
-    # Amostra de dados (mantido para performance)
     df_scatter = df_alunos_filtrado.sample(min(len(df_alunos_filtrado), 5000), random_state=42)
     
     fig_scatter = px.scatter(
@@ -382,7 +378,6 @@ def criar_heatmap_habilidade(df_diag_filtrado: pd.DataFrame, cluster_legend: Dic
                     )
                     row_text.append(hover_item)
                     
-                    # Anotação de valor na célula
                     annotations.append({
                         'x': x_clusters[j], 'y': y_descritores[i], 'text': f"{erro:.0%}",
                         'xref': 'x1', 'yref': 'y1', 'showarrow': False,
@@ -447,9 +442,9 @@ def criar_grafico_top10(df_diag_filtrado: pd.DataFrame, disciplina_selec: str):
     fig_top10.update_yaxes(tickformat=".0%")
     st.plotly_chart(fig_top10, use_container_width=True)
 
-# --- Interface Principal (Execução) ---
+#  Interface Principal (Execução) 
 
-st.title("📊 Painel de Diagnóstico de Habilidades (SAEB)")
+st.title("📊 Painel de Diagnóstico de Habilidades (SAEB-2023)")
 st.markdown("Use este painel para analisar o perfil dos alunos e suas dificuldades por habilidade.")
 
 # 1. Filtro Série
@@ -460,7 +455,6 @@ serie_selecionada = st.sidebar.selectbox(
     key='filtro_serie'
 )
 
-# Carrega os dados com base na série
 dados = carregar_dados(serie_selecionada)
 
 if dados[0] is None:
@@ -468,20 +462,16 @@ if dados[0] is None:
 else:
     df_alunos, df_diag_completo = dados
     
-    # PEGA AS CONFIGURAÇÕES DA SÉRIE
     config_app = CONFIG_APP_SERIES[serie_selecionada]
     CLUSTER_LEGEND = config_app['CLUSTER_LEGEND']
     CLUSTER_PARA_RISCO = config_app['CLUSTER_PARA_RISCO']
     
-    # Variáveis de estado iniciais
     todos_status = sorted(df_alunos['STATUS_RISCO_FINAL'].unique()) 
     todos_clusters = sorted(df_alunos['CLUSTER'].unique())
 
     if 'filtro_status_risco_global_temp' not in st.session_state:
-        # Define os valores iniciais de forma segura
         st.session_state.filtro_status_risco_global_temp = [s for s in STATUS_RISCO_FINAL if s in todos_status]
     if 'filtro_cluster_global_temp' not in st.session_state:
-        # Garante que os clusters selecionados inicializados correspondem aos riscos
         set_clusters_from_risco(config_app) # Chamada inicial para sincronizar
 
     # 2. Filtro de UF 
@@ -514,7 +504,7 @@ else:
     clusters_selecionados_global = st.session_state.filtro_cluster_global_temp
 
 
-    # --- Abas do Painel ---
+    #  Abas do Painel 
     tab_visao_geral, tab_diagnostico = st.tabs(
         ["📈 Visão Geral (O Quem)", "🔬 Diagnóstico (O Porquê)"]
     )
@@ -552,7 +542,7 @@ else:
                 # 3. Gráfico de Barras de Cluster
                 criar_grafico_cluster(df_alunos_filtrado, CLUSTER_LEGEND)
 
-            st.markdown("---")
+            st.markdown("")
             
             # 4. Legenda dos Clusters
             exibir_legenda_clusters(CLUSTER_LEGEND, CLUSTER_PARA_RISCO)
@@ -587,7 +577,6 @@ else:
             (df_diag_completo['CLUSTER'].isin(clusters_para_diag))
         ].copy()
         
-        # Oculta habilidades específicas se houver configuração
         habilidades_ocultar_disc = HABILIDADES_OCULTAR.get(serie_selecionada, {}).get(disciplina_selec, [])
         if habilidades_ocultar_disc:
             df_diag_filtrado = df_diag_filtrado[
@@ -625,7 +614,6 @@ else:
                 inplace=True
             )
             
-            # Ordena: Primeiro pela Habilidade (código), depois pela Taxa de Erro
             df_tabela_completa = df_tabela_completa.sort_values(
                 by=['Habilidade', 'Taxa de Erro Média'], 
                 ascending=[True, False]
